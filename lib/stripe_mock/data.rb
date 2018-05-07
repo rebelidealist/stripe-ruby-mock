@@ -1027,5 +1027,11 @@ module StripeMock
         quantity: 2
       }.merge(params)
     end
+
+    def self.mock_delete_account(params={})
+      {
+        deleted: true
+      }.merge(params)
+    end
   end
 end
