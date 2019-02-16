@@ -30,7 +30,7 @@
             "quantity": 1,
             "plan": {
               "interval": "month",
-              "product": "pr_00000000000000",
+              "product": "prod_00000000000000",
               "amount": 100,
               "currency": "usd",
               "id": "fkx0AFo",

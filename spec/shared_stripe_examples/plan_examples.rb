@@ -5,7 +5,9 @@ shared_examples 'Plan API' do
   it "creates a stripe plan" do
     plan = Stripe::Plan.create(
       :id => 'pid_1',
-      :name => 'The Mock Plan',
+      :product => {
+        :name => 'The Mock Plan'
+      },
       :amount => 9900,
       :currency => 'USD',
       :interval => 1,
@@ -17,7 +19,10 @@ shared_examples 'Plan API' do
     )
 
     expect(plan.id).to eq('pid_1')
-    expect(plan.name).to eq('The Mock Plan')
+    expect(plan.product).to match /test_prod_/
+    product = Stripe::Product.retrieve(plan.product)
+    expect(product.name).to eq('The Mock Plan')
+    expect(product.type).to eq('service')
     expect(plan.amount).to eq(9900)
 
     expect(plan.currency).to eq('USD')
@@ -29,10 +34,56 @@ shared_examples 'Plan API' do
     expect(plan.trial_period_days).to eq(30)
   end
 
+  it "creates a stripe plan with product id" do
+    product = Stripe::Product.create(id: 'prod_1', name: 'Product One', type: 'good')
+
+    plan = Stripe::Plan.create(
+      :id => 'pid_1',
+      :product => 'prod_1',
+      :amount => 9900,
+      :currency => 'USD',
+      :interval => 1,
+      :metadata => {
+        :description => "desc text",
+        :info => "info text"
+      },
+      :trial_period_days => 30
+    )
+
+    expect(plan.id).to eq('pid_1')
+    expect(plan.product).to eq('prod_1')
+    expect(Stripe::Product.retrieve('prod_1').name).to eq('Product One')
+    expect(plan.amount).to eq(9900)
+
+    expect(plan.currency).to eq('USD')
+    expect(plan.interval).to eq(1)
+
+    expect(plan.metadata.description).to eq('desc text')
+    expect(plan.metadata.info).to eq('info text')
+
+    expect(plan.trial_period_days).to eq(30)
+  end
+
+  it "raises error on unknown product" do
+    expect { Stripe::Plan.create(
+      :id => 'pid_1',
+      :product => 'unknown_product',
+      :amount => 9900,
+      :currency => 'USD',
+      :interval => 1,
+      :metadata => {
+        :description => "desc text",
+        :info => "info text"
+      },
+      :trial_period_days => 30
+    ) }.to raise_error(Stripe::InvalidRequestError, 'No such product: unknown_product')
+  end
 
   it "creates a stripe plan without specifying ID" do
     plan = Stripe::Plan.create(
-      :name => 'The Mock Plan',
+      :product => {
+        :name => 'The Mock Plan'
+      },
       :amount => 9900,
       :currency => 'USD',
       :interval => 1,
@@ -44,24 +95,33 @@ shared_examples 'Plan API' do
   it "stores a created stripe plan in memory" do
     plan = Stripe::Plan.create(
       :id => 'pid_2',
-      :name => 'The Memory Plan',
+      :product => {
+        :name => 'The Memory Plan'
+      },
       :amount => 1100,
       :currency => 'USD',
       :interval => 1
     )
     plan2 = Stripe::Plan.create(
       :id => 'pid_3',
-      :name => 'The Bonk Plan',
+      :product => {
+        :name => 'The Bonk Plan',
+      },
       :amount => 7777,
       :currency => 'USD',
       :interval => 1
     )
     data = test_data_source(:plans)
+    products = test_data_source(:products)
     expect(data[plan.id]).to_not be_nil
     expect(data[plan.id][:amount]).to eq(1100)
+    expect(data[plan.id][:product]).to match /prod_/
+    expect(products[plan.product][:name]).to eq 'The Memory Plan'
 
     expect(data[plan2.id]).to_not be_nil
     expect(data[plan2.id][:amount]).to eq(7777)
+    expect(data[plan2.id][:product]).to match /prod_/
+    expect(products[plan2.product][:name]).to eq 'The Bonk Plan'
   end
 
 
@@ -133,7 +193,9 @@ shared_examples 'Plan API' do
     expect {
       Stripe::Plan.create(
         :id => 'pid_1',
-        :name => 'The Mock Plan',
+        :product => {
+          :name => 'The Mock Plan'
+        },
         :amount => 99.99,
         :currency => 'USD',
         :interval => 'month'
@@ -157,7 +219,7 @@ shared_examples 'Plan API' do
         expect { subject }.to raise_error(Stripe::InvalidRequestError, message)
       end
 
-      it("requires a name") { @name = :name }
+      it("requires a product") { @name = :product }
       it("requires an amount") { @name = :amount }
       it("requires a currency") { @name = :currency }
       it("requires an interval") { @name = :interval }

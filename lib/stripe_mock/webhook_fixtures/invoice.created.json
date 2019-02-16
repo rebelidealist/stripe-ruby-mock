@@ -37,7 +37,7 @@
               "livemode": false,
               "interval_count": 1,
               "trial_period_days": null,
-              "product": "pr_00000000000000",
+              "product": "prod_00000000000000",
               "metadata": {}
             },
             "description": null,

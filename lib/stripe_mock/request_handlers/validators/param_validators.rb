@@ -24,6 +24,20 @@ module StripeMock
         end
       end
 
+      def validate_create_product_params(params)
+        @base_strategy.create_product_params.keys.each do |name|
+          message = "Missing required param: #{name}."
+          raise Stripe::InvalidRequestError.new(message, name) if params[name].nil?
+        end
+
+        if products[ params[:id] ]
+          raise Stripe::InvalidRequestError.new("Product already exists.", :id)
+        end
+
+        unless %w(good service).include? params[:type]
+          raise Stripe::InvalidRequestError.new("Invalid type: must be one of good or service", :type)
+        end
+      end
     end
   end
 end

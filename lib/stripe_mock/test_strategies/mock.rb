@@ -14,6 +14,18 @@ module StripeMock
         end
       end
 
+      def create_product(params={})
+        Stripe::Product.create create_product_params(params)
+      end
+
+      def delete_product(product_id)
+        if StripeMock.state == 'remote'
+          StripeMock.client.destroy_resource('products', product_id)
+        elsif StripeMock.state == 'local'
+          StripeMock.instance.products.delete(product_id)
+        end
+      end
+
       def upsert_stripe_object(object, attributes = {})
         if StripeMock.state == 'remote'
           StripeMock.client.upsert_stripe_object(object, attributes)

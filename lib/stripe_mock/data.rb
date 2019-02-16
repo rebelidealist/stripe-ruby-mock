@@ -504,9 +504,30 @@ module StripeMock
         interval_count: 1,
         livemode: false,
         metadata: {},
-        name: "The Basic Plan",
+        product: 'prod_1',
         statement_descriptor: nil,
         trial_period_days: nil
+      }.merge(params)
+    end
+
+    def self.mock_product(params={})
+      prod_id = params[:id] || "test_prod_default"
+      {
+        id: prod_id,
+        name: "The Basic Product",
+        type: 'service',
+        active: true,
+        attributes: {
+          size: 1,
+          gender: 'male'
+        },
+        caption: 'The base product',
+        deactivate_on: [],
+        images: [],
+        metadata: {},
+        package_dimensions: {},
+        shippable: true,
+        url: 'https://api.stripe.com/'
       }.merge(params)
     end
 

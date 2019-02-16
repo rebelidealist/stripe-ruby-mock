@@ -64,7 +64,7 @@
             "quantity": 1,
             "plan": {
               "interval": "month",
-              "product": "pr_00000000000000",
+              "product": "prod_00000000000000",
               "created": 1300000000,
               "amount": 20000,
               "currency": "usd",
