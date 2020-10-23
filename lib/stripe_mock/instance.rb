@@ -1,23 +1,22 @@
 module StripeMock
   class Instance
-
     include StripeMock::RequestHandlers::Helpers
     include StripeMock::RequestHandlers::ParamValidators
 
-    DUMMY_API_KEY = (0...32).map { (65 + rand(26)).chr }.join.downcase
+    DUMMY_API_KEY = (0...32).map { rand(65..90).chr }.join.downcase
 
     # Handlers are ordered by priority
     @@handlers = []
 
     def self.add_handler(route, name)
       @@handlers << {
-        :route => %r{^#{route}$},
-        :name => name
+        route: %r{^#{route}$},
+        name: name
       }
     end
 
     def self.handler_for_method_url(method_url)
-      @@handlers.find {|h| method_url =~ h[:route] }
+      @@handlers.find { |h| method_url =~ h[:route] }
     end
 
     include StripeMock::RequestHandlers::PaymentIntents
@@ -54,16 +53,16 @@ module StripeMock
     include StripeMock::RequestHandlers::Checkout::Session
 
     attr_reader :accounts, :balance, :balance_transactions, :bank_tokens, :charges, :coupons, :customers,
-                :disputes, :events, :invoices, :invoice_items, :orders, :payment_intents, :payment_methods,
-                :setup_intents, :plans, :recipients, :refunds, :transfers, :payouts, :subscriptions, :country_spec,
-                :subscriptions_items, :products, :tax_rates, :checkout_sessions
+      :disputes, :events, :invoices, :invoice_items, :orders, :payment_intents, :payment_methods,
+      :setup_intents, :plans, :recipients, :refunds, :transfers, :payouts, :subscriptions, :country_spec,
+      :subscriptions_items, :products, :tax_rates, :checkout_sessions
 
     attr_accessor :error_queue, :debug, :conversion_rate, :account_balance
 
     def initialize
       @accounts = {}
       @balance = Data.mock_balance
-      @balance_transactions = Data.mock_balance_transactions(['txn_05RsQX2eZvKYlo2C0FRTGSSA','txn_15RsQX2eZvKYlo2C0ERTYUIA', 'txn_25RsQX2eZvKYlo2C0ZXCVBNM', 'txn_35RsQX2eZvKYlo2C0QAZXSWE', 'txn_45RsQX2eZvKYlo2C0EDCVFRT', 'txn_55RsQX2eZvKYlo2C0OIKLJUY', 'txn_65RsQX2eZvKYlo2C0ASDFGHJ', 'txn_75RsQX2eZvKYlo2C0EDCXSWQ', 'txn_85RsQX2eZvKYlo2C0UJMCDET', 'txn_95RsQX2eZvKYlo2C0EDFRYUI'])
+      @balance_transactions = Data.mock_balance_transactions(["txn_05RsQX2eZvKYlo2C0FRTGSSA", "txn_15RsQX2eZvKYlo2C0ERTYUIA", "txn_25RsQX2eZvKYlo2C0ZXCVBNM", "txn_35RsQX2eZvKYlo2C0QAZXSWE", "txn_45RsQX2eZvKYlo2C0EDCVFRT", "txn_55RsQX2eZvKYlo2C0OIKLJUY", "txn_65RsQX2eZvKYlo2C0ASDFGHJ", "txn_75RsQX2eZvKYlo2C0EDCXSWQ", "txn_85RsQX2eZvKYlo2C0UJMCDET", "txn_95RsQX2eZvKYlo2C0EDFRYUI"])
       @bank_tokens = {}
       @card_tokens = {}
       @customers = {}
@@ -72,7 +71,7 @@ module StripeMock
       @payment_methods = {}
       @setup_intents = {}
       @coupons = {}
-      @disputes = Data.mock_disputes(['dp_05RsQX2eZvKYlo2C0FRTGSSA','dp_15RsQX2eZvKYlo2C0ERTYUIA', 'dp_25RsQX2eZvKYlo2C0ZXCVBNM', 'dp_35RsQX2eZvKYlo2C0QAZXSWE', 'dp_45RsQX2eZvKYlo2C0EDCVFRT', 'dp_55RsQX2eZvKYlo2C0OIKLJUY', 'dp_65RsQX2eZvKYlo2C0ASDFGHJ', 'dp_75RsQX2eZvKYlo2C0EDCXSWQ', 'dp_85RsQX2eZvKYlo2C0UJMCDET', 'dp_95RsQX2eZvKYlo2C0EDFRYUI'])
+      @disputes = Data.mock_disputes(["dp_05RsQX2eZvKYlo2C0FRTGSSA", "dp_15RsQX2eZvKYlo2C0ERTYUIA", "dp_25RsQX2eZvKYlo2C0ZXCVBNM", "dp_35RsQX2eZvKYlo2C0QAZXSWE", "dp_45RsQX2eZvKYlo2C0EDCVFRT", "dp_55RsQX2eZvKYlo2C0OIKLJUY", "dp_65RsQX2eZvKYlo2C0ASDFGHJ", "dp_75RsQX2eZvKYlo2C0EDCXSWQ", "dp_85RsQX2eZvKYlo2C0UJMCDET", "dp_95RsQX2eZvKYlo2C0EDFRYUI"])
       @events = {}
       @invoices = {}
       @invoice_items = {}
@@ -123,7 +122,7 @@ module StripeMock
           @error_queue.dequeue
           raise mock_error
         else
-          res = self.send(handler[:name], handler[:route], method_url, params, headers)
+          res = send(handler[:name], handler[:route], method_url, params, headers)
           puts "           [res]  #{res}" if @debug == true
           [to_faraday_hash(res), api_key]
         end
@@ -135,8 +134,8 @@ module StripeMock
     end
 
     def generate_webhook_event(event_data)
-      event_data[:id] ||= new_id 'evt'
-      @events[ event_data[:id] ] = symbolize_names(event_data)
+      event_data[:id] ||= new_id "evt"
+      @events[event_data[:id]] = symbolize_names(event_data)
     end
 
     def upsert_stripe_object(object, attributes)
@@ -149,9 +148,9 @@ module StripeMock
         # Insert new Stripe object
         case object
           when :balance_transaction
-            id = new_balance_transaction('txn', attributes)
+            id = new_balance_transaction("txn", attributes)
           when :dispute
-            id = new_dispute('dp', attributes)
+            id = new_dispute("dp", attributes)
           else
             raise UnsupportedRequestError.new "Unsupported stripe object `#{object}`"
         end
@@ -173,7 +172,7 @@ module StripeMock
 
     private
 
-    def assert_existence(type, id, obj, message=nil)
+    def assert_existence(type, id, obj, message = nil)
       if obj.nil?
         msg = message || "No such #{type}: #{id}"
         raise Stripe::InvalidRequestError.new(msg, type.to_s, http_status: 404)
