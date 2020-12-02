@@ -45,7 +45,7 @@
       "source": null,
       "statement_descriptor": "ACME Corp",
       "statement_descriptor_suffix": null,
-      "status": "requires_source",
+      "status": "processing",
       "transfer_data": {
         "destination": "acct_00000000000000"
       },
