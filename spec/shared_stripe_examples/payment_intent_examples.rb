@@ -92,6 +92,16 @@ shared_examples 'PaymentIntent API' do
     expect(Stripe::BalanceTransaction.retrieve(balance_txn).id).to eq(balance_txn)
   end
 
+  it "includes the payment_method on charges" do
+    payment_intent = Stripe::PaymentIntent.create(
+      amount: 100, currency: "usd", confirm: true, payment_method: "test_pm_1"
+    )
+    expect(payment_intent.status).to eq("succeeded")
+    expect(payment_intent.charges.data.size).to eq(1)
+    expect(payment_intent.charges.data.first.object).to eq("charge")
+    expect(payment_intent.charges.data.first.payment_method).to eq("test_pm_1")
+  end
+
   it "confirms a stripe payment_intent" do
     payment_intent = Stripe::PaymentIntent.create(amount: 100, currency: "usd")
     confirmed_payment_intent = payment_intent.confirm()
