@@ -25,11 +25,11 @@ module StripeMock
 
       def validate_create_product_params(params)
         params[:id] = params[:id].to_s
-        @base_strategy.create_product_params.keys.reject{ |k,_| k == :id }.each do |k|
+        @base_strategy.create_product_params.keys.reject{ |k,_| [:id, :type].include?(k) }.each do |k|
           raise Stripe::InvalidRequestError.new(missing_param_message(k), k) if params[k].nil?
         end
 
-        if !%w[good service].include?(params[:type])
+        if params[:type] && !%w[good service].include?(params[:type])
           raise Stripe::InvalidRequestError.new("Invalid type: must be one of good or service", :type)
         end
 
