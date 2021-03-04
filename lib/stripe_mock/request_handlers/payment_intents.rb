@@ -172,7 +172,8 @@ module StripeMock
         payment_intent[:charges][:data] << Data.mock_charge(
           balance_transaction: btxn,
           amount: payment_intent[:amount],
-          currency: payment_intent[:currency]
+          currency: payment_intent[:currency],
+          payment_method: payment_intent[:payment_method]
         )
 
         payment_intent
