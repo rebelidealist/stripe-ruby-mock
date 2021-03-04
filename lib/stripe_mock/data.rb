@@ -195,6 +195,7 @@ module StripeMock
         fraud_details: {},
         receipt_email: nil,
         receipt_number: nil,
+        receipt_url: nil,
         refunded: false,
         shipping: {},
         statement_descriptor: "Charge #{charge_id}",
@@ -255,7 +256,8 @@ module StripeMock
         charge: "ch_4fWhYjzQ23UFWT",
         receipt_number: nil,
         status: "succeeded",
-        reason: "requested_by_customer"
+        reason: "requested_by_customer",
+        receipt_url: nil
       }.merge(params)
     end
 
