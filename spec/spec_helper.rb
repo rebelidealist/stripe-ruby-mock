@@ -57,5 +57,6 @@ RSpec.configure do |c|
   end
 
   c.filter_run focus: true
+  c.filter_run_excluding ignore: true
   c.run_all_when_everything_filtered = true
 end
