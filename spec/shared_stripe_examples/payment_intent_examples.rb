@@ -2,6 +2,11 @@ require 'spec_helper'
 
 shared_examples 'PaymentIntent API' do
 
+  let(:customer) do
+    token = Stripe::Token.retrieve(stripe_helper.generate_card_token(number: '4242424242424242'))
+    Stripe::Customer.create(email: 'alice@bob.com', source: token.id)
+  end
+
   it "creates a succeeded stripe payment_intent" do
     payment_intent = Stripe::PaymentIntent.create(amount:  100, currency: "usd")
 
@@ -92,6 +97,25 @@ shared_examples 'PaymentIntent API' do
     expect(Stripe::BalanceTransaction.retrieve(balance_txn).id).to eq(balance_txn)
   end
 
+  it 'creates a charge for a stripe payment_intent with confirm flag to true' do
+    payment_intent = Stripe::PaymentIntent.create amount: 100,
+                                                  currency: 'usd',
+                                                  confirm: true,
+                                                  customer: customer,
+                                                  payment_method: customer.sources.first
+
+    charge = payment_intent.charges.data.first
+    expect(charge.amount).to eq(payment_intent.amount)
+    expect(charge.payment_intent).to eq(payment_intent.id)
+    expect(charge.description).to be_nil
+
+    charge.description = 'Updated description'
+    charge.save
+
+    updated = Stripe::Charge.retrieve(charge.id)
+    expect(updated.description).to eq('Updated description')
+  end
+
   it "confirms a stripe payment_intent" do
     payment_intent = Stripe::PaymentIntent.create(amount: 100, currency: "usd")
     confirmed_payment_intent = payment_intent.confirm()
@@ -100,12 +124,52 @@ shared_examples 'PaymentIntent API' do
     expect(confirmed_payment_intent.charges.data.first.object).to eq('charge')
   end
 
+  it 'creates a charge for a confirmed stripe payment_intent' do
+    payment_intent = Stripe::PaymentIntent.create amount: 100,
+                                                  currency: 'usd',
+                                                  customer: customer,
+                                                  payment_method: customer.sources.first
+
+    confirmed_payment_intent = payment_intent.confirm
+    charge = confirmed_payment_intent.charges.data.first
+    expect(charge.amount).to eq(confirmed_payment_intent.amount)
+    expect(charge.payment_intent).to eq(confirmed_payment_intent.id)
+    expect(charge.description).to be_nil
+
+    charge.description = 'Updated description'
+    charge.save
+
+    updated = Stripe::Charge.retrieve(charge.id)
+    expect(updated.description).to eq('Updated description')
+  end
+
   it "captures a stripe payment_intent" do
     payment_intent = Stripe::PaymentIntent.create(amount: 100, currency: "usd")
     confirmed_payment_intent = payment_intent.capture()
     expect(confirmed_payment_intent.status).to eq("succeeded")
     expect(confirmed_payment_intent.charges.data.size).to eq(1)
     expect(confirmed_payment_intent.charges.data.first.object).to eq('charge')
+  end
+
+  it 'creates a charge for a captured stripe payment_intent' do
+    payment_intent = Stripe::PaymentIntent.create amount: 3055,
+                                                  currency: 'usd',
+                                                  customer: customer,
+                                                  payment_method: customer.sources.first,
+                                                  confirm: true,
+                                                  capture_method: 'manual'
+
+    captured_payment_intent = payment_intent.capture
+    charge = captured_payment_intent.charges.data.first
+    expect(charge.amount).to eq(captured_payment_intent.amount)
+    expect(charge.payment_intent).to eq(captured_payment_intent.id)
+    expect(charge.description).to be_nil
+
+    charge.description = 'Updated description'
+    charge.save
+
+    updated = Stripe::Charge.retrieve(charge.id)
+    expect(updated.description).to eq('Updated description')
   end
 
   it "cancels a stripe payment_intent" do
