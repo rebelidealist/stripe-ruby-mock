@@ -414,7 +414,7 @@ module StripeMock
         paid: false,
         receipt_number: nil,
         statement_descriptor: nil,
-        tax: 10,
+        tax: nil,
         tax_percent: nil,
         webhooks_delivered_at: 1349825350,
         livemode: false,
