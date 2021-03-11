@@ -86,11 +86,13 @@ module StripeMock
       def get_ending_time(start_time, plan, intervals = 1)
         return start_time unless plan
 
-        case plan[:interval]
+        interval = plan[:interval] || plan.dig(:recurring, :interval)
+        interval_count = plan[:interval_count] || plan.dig(:recurring, :interval_count) || 1
+        case interval
         when "week"
-          start_time + (604800 * (plan[:interval_count] || 1) * intervals)
+          start_time + (604800 * (interval_count) * intervals)
         when "month"
-          (Time.at(start_time).to_datetime >> ((plan[:interval_count] || 1) * intervals)).to_time.to_i
+          (Time.at(start_time).to_datetime >> ((interval_count) * intervals)).to_time.to_i
         when "year"
           (Time.at(start_time).to_datetime >> (12 * intervals)).to_time.to_i # max period is 1 year
         else
