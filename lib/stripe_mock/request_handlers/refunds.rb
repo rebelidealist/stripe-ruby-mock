@@ -18,7 +18,18 @@ module StripeMock
           end
         end
 
-        charge = assert_existence :charge, params[:charge], charges[params[:charge]]
+        if params[:payment_intent]
+          payment_intent = assert_existence(
+            :payment_intent,
+            params[:payment_intent],
+            payment_intents[params[:payment_intent]]
+          )
+          charge = {}
+        else
+          charge = assert_existence :charge, params[:charge], charges[params[:charge]]
+          payment_intent = {}
+        end
+        params[:amount] ||= payment_intent[:amount]
         params[:amount] ||= charge[:amount]
         id = new_id('re')
         bal_trans_params = {
@@ -32,7 +43,7 @@ module StripeMock
           :id => id,
           :charge => charge[:id],
         )
-        add_refund_to_charge(refund, charge)
+        add_refund_to_charge(refund, charge) unless charge.empty?
         refunds[id] = refund
 
         if params[:expand] == ['balance_transaction']

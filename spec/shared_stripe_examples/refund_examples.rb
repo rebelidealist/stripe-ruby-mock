@@ -22,6 +22,19 @@ shared_examples 'Refund API' do
       expect(charge.amount_refunded).to eq(999)
     end
 
+    it "refunds a stripe payment intent" do
+      payment_intent = Stripe::PaymentIntent.create(
+        amount: 999,
+        currency: 'USD'
+      )
+
+      refund = Stripe::Refund.create(
+        payment_intent: payment_intent.id
+      )
+      expect(refund.amount).to eq(999)
+    end
+
+
     it "creates a stripe refund with a status" do
       charge = Stripe::Charge.create(
         amount: 999,
