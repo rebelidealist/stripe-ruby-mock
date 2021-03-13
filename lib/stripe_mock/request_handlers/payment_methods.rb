@@ -71,6 +71,14 @@ module StripeMock
         id = method_url.match(route)[1]
 
         payment_method = assert_existence :payment_method, id, payment_methods[id]
+
+        if payment_method[:customer].nil?
+          raise Stripe::InvalidRequestError.new(
+            'The payment method you provided is not attached to a customer so detachment is impossible.',
+            http_status: 400
+          )
+        end
+
         payment_method[:customer] = nil
 
         payment_method.clone

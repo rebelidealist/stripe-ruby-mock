@@ -335,6 +335,13 @@ shared_examples 'PaymentMethod API' do
           .to change { Stripe::PaymentMethod.retrieve(payment_method.id).customer }
           .from(customer.id).to(nil)
       end
+
+      context 'and the PaymentMethod isn\'t attached to a customer' do
+        it "raises an error" do
+          expect { Stripe::PaymentMethod.detach(payment_method.id) }
+            .to raise_error(Stripe::InvalidRequestError)
+        end
+      end
     end
 
     context 'with ideal' do
