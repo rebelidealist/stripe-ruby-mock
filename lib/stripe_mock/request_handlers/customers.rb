@@ -67,16 +67,24 @@ module StripeMock
         metadata = cus.delete(:metadata) || {}
         metadata_updates = params.delete(:metadata) || {}
 
-        # Delete those params if their value is nil. Workaround of the problematic way Stripe serialize objects
-        params.delete(:sources) if params[:sources] && params[:sources][:data].nil?
-        params.delete(:subscriptions) if params[:subscriptions] && params[:subscriptions][:data].nil?
-        # Delete those params if their values aren't valid. Workaround of the problematic way Stripe serialize objects
-        if params[:sources] && !params[:sources][:data].nil?
-          params.delete(:sources) unless params[:sources][:data].any?{ |v| !!v[:type]}
-        end
-        if params[:subscriptions] && !params[:subscriptions][:data].nil?
-          params.delete(:subscriptions) unless params[:subscriptions][:data].any?{ |v| !!v[:type]}
-        end
+        # This is a workaround for the problematic way Stripe serialize objects
+        #
+        # Even though e.g. `sources` have not been modified, `params.sources`
+        # contains an empty hash.
+        #
+        # Merging the `params`-hash directly with the customer, would
+        # remove any sources already on the customer, even though no changes
+        # were made to `sources`.
+        #
+        # For this reason, any params containing an empty hash needs to be
+        # deleted. This also has to be done recursively, since some params
+        # are nested, like `shipping.address`.
+        delete_blank(params)
+
+        # Stripe interprets empty strings as `nil`, so when a `param` is an
+        # empty string, it means that the value should be set to `nil`.
+        replace_empty_strings(params)
+
         cus.merge!(params)
         cus[:metadata] = {**metadata, **metadata_updates}
 
@@ -148,6 +156,23 @@ module StripeMock
         cus[:discount] = nil
 
         cus
+      end
+
+      private
+
+      # Deletes all keys with empty values from a hash
+      def delete_blank(hash)
+        hash.delete_if do |_k, v|
+          v.instance_of?(Hash) && delete_blank(v).empty?
+        end
+      end
+
+      # Traverses a hash, replacing all empty strings with `nil`
+      def replace_empty_strings(hash)
+        hash.each do |k, v|
+          replace_empty_strings(v) if v.instance_of?(Hash)
+          hash[k] = nil if v == ''
+        end
       end
     end
   end

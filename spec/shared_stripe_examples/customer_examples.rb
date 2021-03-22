@@ -426,6 +426,66 @@ shared_examples 'Customer API' do
     expect(original.default_source).to_not eq(card.id)
   end
 
+  it 'still has metadata after save when metadata unchanged', live: true do
+    customer = Stripe::Customer.create(source: gen_card_tk, metadata: { order_id: '1234' })
+
+    expect(customer.metadata[:order_id]).to eq('1234')
+    customer.save
+    expect(customer.metadata[:order_id]).to eq('1234')
+  end
+
+  it 'deletes metadata when set to an empty hash', live: true do
+    customer = Stripe::Customer.create(source: gen_card_tk, metadata: { order_id: '1234' })
+
+    expect(customer.metadata[:order_id]).to eq('1234')
+    customer.metadata = {}
+    customer.save
+    expect(customer.metadata[:order_id]).to eq(nil)
+  end
+
+  it 'still has shipping address after save when shipping address unchanged', live: true do
+    customer = Stripe::Customer.create(
+      source: gen_card_tk,
+      shipping: {
+        name: 'John Doe',
+        address: {
+          line1: '2284 Indiana Avenue',
+          city: 'Honolulu',
+          country: 'US',
+          line2: '#404',
+          postal_code: '96813',
+          state: 'HI'
+        }
+      }
+    )
+
+    expect(customer.shipping.address.country).to eq('US')
+    customer.save
+    expect(customer.shipping.address.country).to eq('US')
+  end
+
+  it 'deletes shipping address when set to nil', live: true do
+    customer = Stripe::Customer.create(
+      source: gen_card_tk,
+      shipping: {
+        name: 'John Doe',
+        address: {
+          line1: '2284 Indiana Avenue',
+          city: 'Honolulu',
+          country: 'US',
+          line2: '#404',
+          postal_code: '96813',
+          state: 'HI'
+        }
+      }
+    )
+
+    expect(customer.shipping.address.country).to eq('US')
+    customer.shipping = nil
+    customer.save
+    expect(customer.shipping).to eq(nil)
+  end
+
   it "still has sources after save when sources unchanged" do
     original = Stripe::Customer.create(source: gen_card_tk)
     card = original.sources.data.first
