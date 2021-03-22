@@ -255,7 +255,7 @@ shared_examples 'Webhook Events API' do
       expect(invoice_payment_succeeded.data.object.lines.data.class).to be Array
       expect(invoice_payment_succeeded.data.object.lines.data.length).to be 2
       expect(invoice_payment_succeeded.data.object.lines.data.first).to respond_to(:plan)
-      expect(invoice_payment_succeeded.data.object.lines.data.first.id).to eq('sub_00000000000000')
+      expect(invoice_payment_succeeded.data.object.lines.data.first.id).to eq('sli_00000000000000')
     end
   end
 end

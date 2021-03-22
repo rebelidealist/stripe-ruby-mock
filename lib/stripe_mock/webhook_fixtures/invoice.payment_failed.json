@@ -6,7 +6,7 @@
   "object": "event",
   "data": {
     "object": {
-      "date": 1380674206,
+      "created": 1380674206,
       "id": "in_00000000000000",
       "period_start": 1378082075,
       "period_end": 1380674075,
@@ -50,9 +50,10 @@
             "metadata": {}
           },
           {
-            "id": "su_00000000000000",
+            "id": "sli_00000000000000",
             "object": "line_item",
             "type": "subscription",
+            "subscription": "su_2hksGtIPylSBg2",
             "livemode": false,
             "amount": 20000,
             "currency": "usd",

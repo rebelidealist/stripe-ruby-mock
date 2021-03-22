@@ -17,9 +17,10 @@
         "url": "/v1/invoices/in_00000000000000/lines",
         "data": [
           {
-            "id": "su_00000000000000",
+            "id": "sli_00000000000000",
             "object": "line_item",
             "type": "subscription",
+            "subscription": "su_2hksGtIPylSBg2",
             "livemode": true,
             "amount": 100,
             "currency": "usd",

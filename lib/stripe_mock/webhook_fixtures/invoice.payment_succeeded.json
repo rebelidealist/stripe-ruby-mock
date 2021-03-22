@@ -23,7 +23,7 @@
       "forgiven": false,
       "lines": {
         "data": [{
-          "id": "sub_00000000000000",
+          "id": "sli_00000000000000",
           "object": "line_item",
           "amount": 50,
           "currency": "eur",
@@ -51,12 +51,12 @@
           },
           "proration": false,
           "quantity": 1,
-          "subscription": null,
+          "subscription": "su_2hksGtIPylSBg2",
           "subscription_item": "si_18ZfWyLrgDIZ7iq8fSlSNGIV",
           "type": "subscription"
         },
         {
-          "id": "sub_00000000000000",
+          "id": "sli_00000000000000",
           "object": "line_item",
           "amount": 50,
           "currency": "eur",
@@ -84,7 +84,7 @@
           },
           "proration": false,
           "quantity": 1,
-          "subscription": null,
+          "subscription": "su_00000000000",
           "subscription_item": "si_18ZfWyLrgDIZ7iq8fSlSNGIV",
           "type": "subscription"
         }],
