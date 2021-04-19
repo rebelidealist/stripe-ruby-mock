@@ -9,7 +9,7 @@ shared_examples 'Transfer API' do
     expect(transfer.id).to match /^test_tr/
     expect(transfer.amount).to eq(100)
     expect(transfer.amount_reversed).to eq(0)
-    expect(transfer.balance_transaction).to eq('txn_2dyYXXP90MN26R')
+    expect(transfer.balance_transaction).to eq('test_txn_1')
     expect(transfer.created).to eq(1304114826)
     expect(transfer.currency).to eq('usd')
     expect(transfer.description).to eq('Transfer description')
@@ -28,6 +28,15 @@ shared_examples 'Transfer API' do
     expect(transfer.source_transaction).to eq("ch_164xRv2eZvKYlo2Clu1sIJWB")
     expect(transfer.source_type).to eq("card")
     expect(transfer.transfer_group).to eq("group_ch_164xRv2eZvKYlo2Clu1sIJWB")
+  end
+
+  it "creates a balance transaction" do
+    destination = Stripe::Account.create(type: "custom", email: "#{SecureRandom.uuid}@example.com", id: "acct_12345", requested_capabilities: ['card_payments', 'platform_payments'])
+    transfer = Stripe::Transfer.create(amount: 100, currency: "usd", destination: destination.id)
+
+    bal_trans = Stripe::BalanceTransaction.retrieve(transfer.balance_transaction)
+    expect(bal_trans.amount).to eq(100)
+    expect(bal_trans.source).to eq(transfer.id)
   end
 
   describe "listing transfers" do

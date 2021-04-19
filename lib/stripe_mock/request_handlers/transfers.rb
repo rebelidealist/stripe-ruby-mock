@@ -45,7 +45,18 @@ module StripeMock
           raise Stripe::InvalidRequestError.new("Invalid integer: #{params[:amount]}", 'amount', http_status: 400)
         end
 
-        transfers[id] = Data.mock_transfer(params.merge :id => id)
+        bal_trans_params = { amount: params[:amount].to_i, source: id }
+
+        balance_transaction_id = new_balance_transaction('txn', bal_trans_params)
+
+        transfers[id] = Data.mock_transfer(params.merge(id: id, balance_transaction: balance_transaction_id))
+
+        transfer = transfers[id].clone
+        if params[:expand] == ['balance_transaction']
+          transfer[:balance_transaction] = balance_transactions[balance_transaction_id]
+        end
+
+        transfer
       end
 
       def get_transfer(route, method_url, params, headers)
