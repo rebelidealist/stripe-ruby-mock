@@ -128,6 +128,17 @@ shared_examples 'PaymentMethod API' do
         expect { payment_method }.to raise_error(Stripe::InvalidRequestError)
       end
     end
+
+    context 'when a payment_method is supplied' do
+      let(:type) { nil }
+      let(:original) { Stripe::PaymentMethod.create(type: 'card') }
+      let(:payment_method) { Stripe::PaymentMethod.create(payment_method: original.id, type: type) }
+
+      it 'allows cloning a payment method without specifying the type' do
+        expect(payment_method.id).to match(/^test_pm/)
+        expect(payment_method.id).not_to eq(original.id)
+      end
+    end
   end
 
   # get /v1/payment_methods/:id
