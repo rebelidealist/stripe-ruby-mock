@@ -633,6 +633,18 @@ shared_examples 'Customer Subscriptions with plans' do
         expect(subscription.default_tax_rates.first.id).to eq(tax_rate.id)
       end
     end
+
+    it 'accepts backdate_start_date param' do
+      plan
+      backdate_start_date = Time.new(Time.now.year, Time.now.month, 1).to_i
+      customer = Stripe::Customer.create(source: gen_card_tk)
+      subscription = Stripe::Subscription.create(
+        customer: customer.id,
+        items: [{ plan: 'silver' }],
+        backdate_start_date: backdate_start_date
+      )
+      expect(subscription.backdate_start_date).to eq backdate_start_date
+    end
   end
 
   context "updating a subscription" do
