@@ -179,6 +179,7 @@ shared_examples 'Customer Subscriptions with plans' do
       expect(subscriptions.data).to be_a(Array)
       expect(subscriptions.data.count).to eq(1)
       expect(subscriptions.data.first.discount).not_to be_nil
+      expect(subscriptions.data.first.discount.id).not_to be_nil
       expect(subscriptions.data.first.discount).to be_a(Stripe::Discount)
       expect(subscriptions.data.first.discount.coupon.id).to eq(coupon.id)
     end
