@@ -778,8 +778,9 @@ module StripeMock
       {
         :id => id,
         :object => "dispute",
+        :balance_transaction => "txn_2dyYXXP90MN26R",
         :amount => 195,
-        :balance_transactions => [],
+        :balance_transactions => [OpenStruct.new(self.mock_balance_transaction(fee: 1500, amount: -1000))],
         :charge => "ch_15RsQR2eZvKYlo2CA8IfzCX0",
         :created => @timestamp += 1,
         :currency => currency,
@@ -1106,18 +1107,20 @@ module StripeMock
       currency = params[:currency] || StripeMock.default_currency
       bt_id = params[:id] || 'test_txn_default'
       source = params[:source] || 'ch_test_charge'
+      amount = params[:amount] || 10000
+      fee = params[:fee] || 320
       {
         id: bt_id,
         object: "balance_transaction",
-        amount: 10000,
+        amount: amount,
         available_on: 1462406400,
         created: 1461880226,
         currency: currency,
         description: nil,
-        fee: 320,
+        fee: fee,
         fee_details: [
           {
-            amount: 320,
+            amount: fee,
             application: nil,
             currency: currency,
             description: "Stripe processing fees",
