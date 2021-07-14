@@ -1,8 +1,11 @@
 require 'spec_helper'
 
 shared_examples 'Price API' do
-  let(:product) { stripe_helper.create_product }
-  let(:product_id) { product.id }
+  let(:product_id) { "product_id_1" }
+  let(:product) { stripe_helper.create_product(id: product_id) }
+
+  let(:other_product_id) { "product_id_2" }
+  let(:other_product) { stripe_helper.create_product(id: other_product_id) }
 
   let(:price_attributes) { {
     :id => "price_abc123",
@@ -26,6 +29,7 @@ shared_examples 'Price API' do
 
   before(:each) do
     product
+    other_product
   end
 
   it "creates a stripe price" do
@@ -123,6 +127,42 @@ shared_examples 'Price API' do
     expect(two.count).to eq(1)
     expect(two.map &:id).to include('price Two')
     expect(two.map &:amount).to include(98765)
+  end
+
+  it "retrieves prices filtering by currency" do
+    5.times do | i|
+      stripe_helper.create_price(id: "usd price #{i}", product: product_id, amount: 11, currency: 'usd')
+      stripe_helper.create_price(id: "brl price #{i}", product: product_id, amount: 11, currency: 'brl')
+    end
+
+    all = Stripe::Price.list()
+    expect(all.count).to eq(10)
+
+    usd = Stripe::Price.list({currency: 'usd'})
+    expect(usd.count).to eq(5)
+    expect(usd.all? {|p| p.currency == 'usd' }).to be_truthy
+
+    brl = Stripe::Price.list({currency: 'brl'})
+    expect(brl.count).to eq(5)
+    expect(brl.all? {|p| p.currency == 'brl' }).to be_truthy
+  end
+
+  it "retrieves prices filtering by product" do
+    5.times do | i|
+      stripe_helper.create_price(id: "product 1 price #{i}", product: product_id)
+      stripe_helper.create_price(id: "product 2 price #{i}", product: other_product_id)
+    end
+
+    all = Stripe::Price.list()
+    expect(all.count).to eq(10)
+
+    product_prices = Stripe::Price.list({product: product.id})
+    expect(product_prices.count).to eq(5)
+    expect(product_prices.all? {|p| p.product == product.id }).to be_truthy
+
+    other_product_prices = Stripe::Price.list({product: other_product.id})
+    expect(other_product_prices.count).to eq(5)
+    expect(other_product_prices.all? {|p| p.product == other_product.id }).to be_truthy
   end
 
   describe "Validations", :live => true do

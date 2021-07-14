@@ -37,6 +37,18 @@ module StripeMock
           end
         end
 
+        if params.key?(:currency)
+          price_data.select! do |price|
+            params[:currency] == price[:currency]
+          end
+        end
+
+        if params.key?(:product)
+          price_data.select! do |price|
+            params[:product] == price[:product]
+          end
+        end
+
         Data.mock_list_object(price_data.first(limit), params.merge!(limit: limit))
       end
     end
