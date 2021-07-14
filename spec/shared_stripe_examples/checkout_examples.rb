@@ -34,5 +34,14 @@ shared_examples 'Checkout API' do
         expect(e.http_status).to eq(404)
       }
     end
+
+    it 'can expand setup_intent' do
+      setup_intent = Stripe::SetupIntent.create
+      initial_session = Stripe::Checkout::Session.create(setup_intent: setup_intent.id)
+
+      checkout_session = Stripe::Checkout::Session.retrieve(id: initial_session.id, expand: ['setup_intent'])
+
+      expect(checkout_session.setup_intent).to eq(setup_intent)
+    end
   end
 end

@@ -8,7 +8,13 @@ module StripeMock
 
         def get_checkout_session(route, method_url, params, headers)
           route =~ method_url
-          assert_existence :checkout_session, $1, checkout_sessions[$1]
+          checkout_session = assert_existence :checkout_session, $1, checkout_sessions[$1]
+
+          checkout_session = checkout_session.clone
+          if params[:expand]&.include?('setup_intent') && checkout_session[:setup_intent]
+            checkout_session[:setup_intent] = setup_intents[checkout_session[:setup_intent]]
+          end
+          checkout_session
         end
       end
     end
