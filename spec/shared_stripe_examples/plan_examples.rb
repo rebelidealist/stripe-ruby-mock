@@ -47,6 +47,22 @@ shared_examples 'Plan API' do
     expect(plan_without_id.id).to match(/^test_plan_1/)
   end
 
+  it "creates a stripe plan with a new service product" do
+    plan = Stripe::Plan.create(plan_attributes.merge(product: { id: 'prod_abc123', name: 'My Mock Product' }))
+
+    expect(plan.product).to eq('prod_abc123')
+
+    product = Stripe::Product.retrieve(plan.product)
+    expect(product.name).to eq('My Mock Product')
+    expect(product.type).to eq('service')
+  end
+
+  it "creates a stripe plan with a new service product without specifying ID" do
+    plan = Stripe::Plan.create(plan_attributes.merge(product: { name: 'My Mock Product' }))
+
+    expect(plan.product).to match /test_prod_/
+  end
+
   it "stores a created stripe plan in memory" do
     plan
     plan2 = Stripe::Plan.create(plan_attributes.merge(id: "plan_def456", amount: 299))
