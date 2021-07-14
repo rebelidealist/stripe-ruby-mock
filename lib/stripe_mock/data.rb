@@ -365,7 +365,7 @@ module StripeMock
         canceled_at: nil,
         collection_method: 'charge_automatically',
         ended_at: nil,
-        start: 1308595038,
+        start_date: 1308595038,
         object: 'subscription',
         trial_start: 1308595038,
         trial_end: 1308681468,
