@@ -101,14 +101,6 @@ shared_examples "Product API" do
       it("requires a name") { @attribute_name = :name }
     end
 
-    describe "Inclusion" do
-      it "validates inclusion of type in 'good' or 'service'" do
-        expect {
-          Stripe::Product.create(params.merge({type: "OOPS"}))
-        }.to raise_error(Stripe::InvalidRequestError, "Invalid type: must be one of good or service")
-      end
-    end
-
     describe "Uniqueness" do
       let(:already_exists_message){ stripe_validator.already_exists_message(Stripe::Product) }
 
